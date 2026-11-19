@@ -27,8 +27,8 @@ module tb ();
   wire VGND = 1'b0;
 `endif
 
-  // Replace tt_um_example with your module name:
-   tt_um_ multiplicador_4bits (
+  // Device under test (module name must match src/project.v and info.yaml):
+  tt_um_multiplicador_4bits user_project (
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST
@@ -47,3 +47,5 @@ module tb ();
   );
 
 endmodule
+
+
