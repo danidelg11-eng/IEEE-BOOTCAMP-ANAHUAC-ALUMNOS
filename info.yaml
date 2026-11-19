@@ -1,92 +1,61 @@
-title: "4-Bit Binary Multiplier"
-author: "Daniel Delgado, Ines Tejada, Maria Pia"
-discord: ""
-description: "4-bit binary multiplier with 8-bit input, 8-bit output and D-type flip-flops"
-language: "Verilog"
-clock_hz: 0
+# Tiny Tapeout project information
+project:
+  title:        "4-bit Array Multiplier"      # Project title
+  author:       "Daniel Delgado Gutiérrez, David Suárez Pérez, Emiliano Almanza Repetto, Inés Tejada Madrazo, María Pía Pacheco Rodríguez"
+  discord:      ""
+  description:  "Gate-level 4x4 array multiplier (16 AND + 12 full adders) with D flip-flop input/output registers"
+  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  clock_hz:     50000000  # Clock frequency in Hz (matches CLOCK_PERIOD = 20 ns in src/config.json)
 
-tiles: "1x1"
+  # How many tiles your design occupies? A single tile is about 340x160 uM.
+  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
 
-top_module: "tt_um_multiplicador_4bits"
+  # Your top module name must start with "tt_um_". Make it unique by including your github username:
+  top_module:  "tt_um_danidelg11_eng_multiplier_4bit"
 
-source_files:
-- "project.v"
-Pin assignments
+  # List your project's source files here.
+  # Source files must be in ./src and you must list each source file separately, one per line.
+  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
+  source_files:
+    - "project.v"
+    - "register_8.v"
+    - "d_ff.v"
+    - "ripple_carry_4.v"
+    - "full_adder.v"
+
+# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
+# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
-Inputs - Operand B
-ui[0]: "B0"
-ui[1]: "B1"
-ui[2]: "B2"
-ui[3]: "B3"
-Inputs - Operand A
-ui[4]: "A0"
-ui[5]: "A1"
-ui[6]: "A2"
-ui[7]: "A3"
-Outputs - Product
-uo[0]: "P0"
-uo[1]: "P1"
-uo[2]: "P2"
-uo[3]: "P3"
-uo[4]: "P4"
-uo[5]: "P5"
-uo[6]: "P6"
-uo[7]: "P7"
-Bidirectional pins - Unused
-uio[0]: ""
-uio[1]: ""
-uio[2]: ""
-uio[3]: ""
-uio[4]: ""
-uio[5]: ""
-uio[6]: ""
-uio[7]: ""
-Do not change!
-yaml_version: 6
-</CodeBlock>
-4. Resultado de la revisión
-He comprobado la correspondencia de los nombres y pines, validado la estructura YAML y ejecutado una comprobación matemática de las 256 combinaciones de los productos parciales.
+  # Inputs 
+  ui[0]: "A0"
+  ui[1]: "A1"
+  ui[2]: "A2"
+  ui[3]: "A3"
+  ui[4]: "B0"
+  ui[5]: "B1"
+  ui[6]: "B2"
+  ui[7]: "B3"
 
-<box border radius="lg" padding={3} gap={2}>
-  <row align="center" justify="between">
-    <text weight="medium">Sintaxis YAML</text>
-    <row align="center" gap={1}>
-      <icon name="check-circle" color="success"/>
-      <text color="success" size="sm">Validada</text>
-    </row>
-  </row>
-  <divider color="subtle"/>
-  <row align="center" justify="between">
-    <text weight="medium">24 pines declarados</text>
-    <row align="center" gap={1}>
-      <icon name="check-circle" color="success"/>
-      <text color="success" size="sm">Correcto</text>
-    </row>
-  </row>
-  <divider color="subtle"/>
-  <row align="center" justify="between">
-    <text weight="medium">Nombre del módulo en los tres archivos</text>
-    <row align="center" gap={1}>
-      <icon name="check-circle" color="success"/>
-      <text color="success" size="sm">Coincide</text>
-    </row>
-  </row>
-  <divider color="subtle"/>
-  <row align="center" justify="between">
-    <text weight="medium">256 multiplicaciones (comprobación matemática)</text>
-    <row align="center" gap={1}>
-      <icon name="check-circle" color="success"/>
-      <text color="success" size="sm">256/256</text>
-    </row>
-  </row>
-  <divider color="subtle"/>
-  <row align="center" justify="between">
-    <text weight="medium">Compilación Verilog</text>
-    <text color="secondary" size="sm">Pendiente</text>
-  </row>
-  <divider color="subtle"/>
-  <row align="center" justify="between">
-    <text weight="medium">Simulación Cocotb / GitHub Actions</text>
-    <text color="secondary" size="sm">Pendiente</text>
-  </row>
-</box>
+  # Outputs
+  uo[0]: "P0"
+  uo[1]: "P1"
+  uo[2]: "P2"
+  uo[3]: "P3"
+  uo[4]: "P4"
+  uo[5]: "P5"
+  uo[6]: "P6"
+  uo[7]: "P7"
+
+  # Bidirectional pins
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
+
+# Do not change!
+yaml_version: 6
+
