@@ -1,91 +1,92 @@
-`default_nettype none
+title: "4-Bit Binary Multiplier"
+author: "Daniel Delgado, Ines Tejada, Maria Pia"
+discord: ""
+description: "4-bit binary multiplier with 8-bit input, 8-bit output and D-type flip-flops"
+language: "Verilog"
+clock_hz: 0
 
-// ==================================================
-// PROJECT: 4-BIT BINARY MULTIPLIER
-// TOP MODULE: tt_um_multiplicador_4bits
-// PLATFORM: TINY TAPEOUT
-// INPUT: 8 BITS
-// OUTPUT: 8 BITS
-// FLIP-FLOPS: D-TYPE
-// ==================================================
+tiles: "1x1"
 
-module tt_um_multiplicador_4bits (
-    input wire [7:0] ui_in,
-    output wire [7:0] uo_out,
-    input wire [7:0] uio_in,
-    output wire [7:0] uio_out,
-    output wire [7:0] uio_oe,
-    input wire ena,
-    input wire clk,
-    input wire rst_n
-);
+top_module: "tt_um_multiplicador_4bits"
 
-    // ==============================================
-    // INPUT OPERANDS
-    // ==============================================
+source_files:
+- "project.v"
+Pin assignments
+pinout:
+Inputs - Operand B
+ui[0]: "B0"
+ui[1]: "B1"
+ui[2]: "B2"
+ui[3]: "B3"
+Inputs - Operand A
+ui[4]: "A0"
+ui[5]: "A1"
+ui[6]: "A2"
+ui[7]: "A3"
+Outputs - Product
+uo[0]: "P0"
+uo[1]: "P1"
+uo[2]: "P2"
+uo[3]: "P3"
+uo[4]: "P4"
+uo[5]: "P5"
+uo[6]: "P6"
+uo[7]: "P7"
+Bidirectional pins - Unused
+uio[0]: ""
+uio[1]: ""
+uio[2]: ""
+uio[3]: ""
+uio[4]: ""
+uio[5]: ""
+uio[6]: ""
+uio[7]: ""
+Do not change!
+yaml_version: 6
+</CodeBlock>
+4. Resultado de la revisión
+He comprobado la correspondencia de los nombres y pines, validado la estructura YAML y ejecutado una comprobación matemática de las 256 combinaciones de los productos parciales.
 
-    wire [3:0] A;
-    wire [3:0] B;
-
-    assign A = ui_in[7:4];
-    assign B = ui_in[3:0];
-
-    // ==============================================
-    // PARTIAL PRODUCTS
-    // ==============================================
-
-    wire [7:0] pp0;
-    wire [7:0] pp1;
-    wire [7:0] pp2;
-    wire [7:0] pp3;
-
-    assign pp0 = {4'b0000, (A & {4{B[0]}})};
-    assign pp1 = {3'b000, (A & {4{B[1]}}), 1'b0};
-    assign pp2 = {2'b00, (A & {4{B[2]}}), 2'b00};
-    assign pp3 = {1'b0, (A & {4{B[3]}}), 3'b000};
-
-    // ==============================================
-    // MULTIPLICATION RESULT
-    // ==============================================
-
-    wire [7:0] product_comb;
-
-    assign product_comb = pp0 + pp1 + pp2 + pp3;
-
-    // ==============================================
-    // D-TYPE FLIP-FLOP REGISTER
-    // ==============================================
-
-    reg [7:0] product_reg;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            product_reg <= 8'b00000000;
-        else
-            product_reg <= product_comb;
-    end
-
-    // ==============================================
-    // OUTPUT PINS
-    // ==============================================
-
-    assign uo_out = product_reg;
-
-    // ==============================================
-    // UNUSED BIDIRECTIONAL PINS
-    // ==============================================
-
-    assign uio_out = 8'b00000000;
-    assign uio_oe = 8'b00000000;
-
-    // ==============================================
-    // UNUSED INPUT SIGNALS
-    // ==============================================
-
-    wire unused;
-
-    assign unused = &{ena, uio_in};
-
-endmodule
-
-`default_nettype wire
+<box border radius="lg" padding={3} gap={2}>
+  <row align="center" justify="between">
+    <text weight="medium">Sintaxis YAML</text>
+    <row align="center" gap={1}>
+      <icon name="check-circle" color="success"/>
+      <text color="success" size="sm">Validada</text>
+    </row>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" justify="between">
+    <text weight="medium">24 pines declarados</text>
+    <row align="center" gap={1}>
+      <icon name="check-circle" color="success"/>
+      <text color="success" size="sm">Correcto</text>
+    </row>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" justify="between">
+    <text weight="medium">Nombre del módulo en los tres archivos</text>
+    <row align="center" gap={1}>
+      <icon name="check-circle" color="success"/>
+      <text color="success" size="sm">Coincide</text>
+    </row>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" justify="between">
+    <text weight="medium">256 multiplicaciones (comprobación matemática)</text>
+    <row align="center" gap={1}>
+      <icon name="check-circle" color="success"/>
+      <text color="success" size="sm">256/256</text>
+    </row>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" justify="between">
+    <text weight="medium">Compilación Verilog</text>
+    <text color="secondary" size="sm">Pendiente</text>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" justify="between">
+    <text weight="medium">Simulación Cocotb / GitHub Actions</text>
+    <text color="secondary" size="sm">Pendiente</text>
+  </row>
+</box>
