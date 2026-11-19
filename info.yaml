@@ -1,56 +1,110 @@
-# Tiny Tapeout project information
-project:
-  title:        "Multiplicador de 4 bits"      # Project title
-  author:       ""      # Ines Tejada, Daniel Delgado, David Suarez, María Pía Pacheco, Emiliano Almanza
-  discord:      ""      # Ines, Daniel, David, Pía, Emiliano
-  description:  "Unidad aritmética que obtiene el producto entre dos operandos de 4 bits, usando un registro de desplazamiento, con una salida de 8 bits"      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+`default_nettype none
 
-  # How many tiles your design occupies? A single tile is about 340x160 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
+// ==================================================
+// PROJECT: 4-BIT BINARY MULTIPLIER
+// TOP MODULE: tt_um_multiplicador_4bits
+// PLATFORM: TINY TAPEOUT
+//
+// INPUT:  8-bit bus (two 4-bit operands)
+// OUTPUT: 8-bit product
+// STORAGE: 8 D-type flip-flops
+//
+// OPERATION:
+// The multiplication is combinational.
+// The result is stored on each rising clock edge.
+// ==================================================
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_ multiplicador_4bits"
+module tt_um_multiplicador_4bits (
+    input  wire [7:0] ui_in,
+    output wire [7:0] uo_out,
+    input  wire [7:0] uio_in,
+    output wire [7:0] uio_out,
+    output wire [7:0] uio_oe,
+    input  wire       ena,
+    input  wire       clk,
+    input  wire       rst_n
+);
 
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
-  source_files:
-    - "project.v"
+    // ==============================================
+    // 1. INPUT OPERANDS
+    // ==============================================
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
-pinout:
-  # Inputs 
-  ui[0]: "B0"
-  ui[1]: "B1"
-  ui[2]: "B2"
-  ui[3]: "B3"
-  ui[4]: "A0"
-  ui[5]: "A1"
-  ui[6]: "A2"
-  ui[7]: "A3"
+    wire [3:0] A;
+    wire [3:0] B;
 
-  # Outputs
-  uo[0]: "P0"
-  uo[1]: "P1"
-  uo[2]: "P2"
-  uo[3]: "P3"
-  uo[4]: "P4"
-  uo[5]: "P5"
-  uo[6]: "P6"
-  uo[7]: "P7"
+    assign A = ui_in[7:4];
+    assign B = ui_in[3:0];
 
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
 
-# Do not change!
-yaml_version: 6
+    // ==============================================
+    // 2. PARTIAL PRODUCT GENERATION
+    // ==============================================
+
+    wire [7:0] pp0;
+    wire [7:0] pp1;
+    wire [7:0] pp2;
+    wire [7:0] pp3;
+
+    assign pp0 = {4'b0000, (A & {4{B[0]}})};
+
+    assign pp1 = {3'b000, (A & {4{B[1]}}), 1'b0};
+
+    assign pp2 = {2'b00, (A & {4{B[2]}}), 2'b00};
+
+    assign pp3 = {1'b0, (A & {4{B[3]}}), 3'b000};
+
+
+    // ==============================================
+    // 3. PARTIAL PRODUCT ADDITION
+    // ==============================================
+
+    wire [7:0] product_comb;
+
+    assign product_comb = pp0 + pp1 + pp2 + pp3;
+
+
+    // ==============================================
+    // 4. D-TYPE FLIP-FLOP OUTPUT REGISTER
+    // ==============================================
+
+    reg [7:0] product_reg;
+
+    always @(posedge clk or negedge rst_n) begin
+
+        if (!rst_n) begin
+            product_reg <= 8'b00000000;
+        end
+
+        else begin
+            product_reg <= product_comb;
+        end
+
+    end
+
+
+    // ==============================================
+    // 5. OUTPUT ASSIGNMENT
+    // ==============================================
+
+    assign uo_out = product_reg;
+
+
+    // ==============================================
+    // 6. UNUSED BIDIRECTIONAL PINS
+    // ==============================================
+
+    assign uio_out = 8'b00000000;
+    assign uio_oe  = 8'b00000000;
+
+
+    // ==============================================
+    // 7. UNUSED INPUT SIGNALS
+    // ==============================================
+
+    wire unused;
+
+    assign unused = &{ena, uio_in};
+
+endmodule
+
+`default_nettype wire
