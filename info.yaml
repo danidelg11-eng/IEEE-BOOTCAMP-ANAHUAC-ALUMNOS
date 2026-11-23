@@ -1,7 +1,7 @@
 # Tiny Tapeout project information
 project:
   title:        "Reloj Digital (RTC) y Calendario"      # Project title
-  author:       ""      # Your name
+  author:       "Iván Najera, David Ricardez, Ashlie Henriquez, Antonio Rodríguez, Javier Chango"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Reloj en tiempo real con calendario de día/mes, alarma programable y salida multiplexada directa para controlar un display de 7 segmentos de 4 dígitos."      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
