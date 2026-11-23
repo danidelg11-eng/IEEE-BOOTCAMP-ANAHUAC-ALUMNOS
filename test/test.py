@@ -125,10 +125,12 @@ async def test_project(dut):
     ], f"Expected AL 07.00, got {alarm_digits}"
 
     # 4. Set Date to 28.02.28 (leap year 2028) and verify is_leap == 1
-    await pulse_inc(dut, view_mode=1, field_sel=2, times=2)   # Year: 26 -> 28
-    await pulse_inc(dut, view_mode=1, field_sel=1, times=1)   # Month: 01 -> 02
-    await pulse_inc(dut, view_mode=1, field_sel=0, times=27)  # Day: 01 -> 28
-    assert ((int(dut.uio_out.value) >> 7) & 1) == 1
+// Control de disparo y apagado de alarma
+            if (!alarm_en) begin
+                alarm_ring <= 1'b0;
+            end else if (!edit_en && alarm_match) begin
+                alarm_ring <= 1'b1;
+            end
 
     # 5. Set Alarm to 00:00 and Time to 23:59:00, then run 60 simulated seconds
     await pulse_inc(dut, view_mode=2, field_sel=0, times=17, alarm_en=1)  # Alarm hr: 07 -> 00
