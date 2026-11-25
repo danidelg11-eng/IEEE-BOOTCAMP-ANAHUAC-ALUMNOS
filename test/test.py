@@ -55,4 +55,4 @@ async def test_project(dut):
                 f"obtenido {resultado} ({resultado:08b})"
             )
 
-    dut._log.info("¡Todas las 256 combinaciones pasaron correctamente!")nes pasaron correctamente.")
+    dut._log.info("¡Todas las 256 combinaciones pasaron correctamente!")
