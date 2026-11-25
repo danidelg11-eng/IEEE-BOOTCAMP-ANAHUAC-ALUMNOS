@@ -1,42 +1,58 @@
-def multiplicador_secuencial_4bits(A: int, B: int) -> int:
-    """
-    Simula exactamente el diagrama de bloques del multiplicador de 4 bits:
-    - A: Multiplicando (4 bits: 0 a 15)
-    - B: Multiplicador (4 bits: 0 a 15)
-    - Q: Registro síncrono de 8 bits (Q7..Q4 | Q3..Q0)
-    """
-    A &= 0xF
-    B &= 0xF
+# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
+# SPDX-License-Identifier: Apache-2.0
 
-    # 1. LOAD = 1: Carga 0000 en la parte alta y B3..B0 en la parte baja
-    Q = B  # Equivale a (0b0000 << 4) | B
-
-    # 2. 4 pulsos de reloj (desplazamiento y suma)
-    for ciclo in range(4):
-        q0 = Q & 1                        # Bit menos significativo (Q0)
-        pp = A if q0 == 1 else 0          # Productos parciales: PPi = Ai * Q0
-        q_alto = (Q >> 4) & 0xF           # Parte alta actual: Q7..Q4
-        q_bajo_desplazado = (Q & 0xF) >> 1  # Q3..Q1
-
-        # Sumador de 4 bits: (Q7..Q4) + PP -> genera {Cout, S3..S0} (5 bits)
-        suma_5bits = q_alto + pp
-
-        # Nuevo registro Q: {Cout, S3..S0, Q3, Q2, Q1}
-        Q = (suma_5bits << 3) | q_bajo_desplazado
-
-    return Q
+import cocotb
+from cocotb.clock import Clock
+from cocotb.triggers import ClockCycles
 
 
-# --- Pruebas de verificación ---
-if __name__ == "__main__":
-    # Probar casos específicos
-    for a, b in [(3, 5), (10, 12), (15, 15), (0, 9)]:
-        res = multiplicador_secuencial_4bits(a, b)
-        print(f"{a:2d} x {b:2d} = {res:3d} (binario: {res:08b})")
+def pack_ui(a: int, b: int) -> int:
+    """Empaqueta A en ui_in[7:4] y B en ui_in[3:0]."""
+    return ((a & 0xF) << 4) | (b & 0xF)
+
+
+async def multiply_hw(dut, a: int, b: int) -> int:
+    """Ejecuta una multiplicación en el módulo Verilog (1 ciclo LOAD + 4 ciclos shift)."""
+    # 1. Cargar operandos y activar LOAD = 1 (uio_in[0])
+    dut.ui_in.value = pack_ui(a, b)
+    dut.uio_in.value = 0x01
+    await ClockCycles(dut.clk, 1)
+
+    # 2. Desactivar LOAD = 0 y esperar los 4 desplazamientos + 1 ciclo de estabilización
+    dut.uio_in.value = 0x00
+    await ClockCycles(dut.clk, 5)
+
+    return int(dut.uo_out.value)
+
+
+@cocotb.test()
+async def test_project(dut):
+    dut._log.info("Iniciando pruebas del multiplicador secuencial de 4 bits")
+
+    # Reloj de 10 us (100 kHz). Nota: si usas cocotb < 2.0, cambia 'unit' por 'units'
+    clock = Clock(dut.clk, 10, unit="us")
+    cocotb.start_soon(clock.start())
+
+    # Reset activo en bajo
+    dut.ena.value = 1
+    dut.ui_in.value = 0
+    dut.uio_in.value = 0
+    dut.rst_n.value = 0
+    await ClockCycles(dut.clk, 5)
+    dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 1)
+
+    # Verificar estado tras reset
+    assert int(dut.uo_out.value) == 0, f"Se esperaba 0 tras reset, se obtuvo {int(dut.uo_out.value)}"
 
     # Barrido completo de las 256 combinaciones (0..15 x 0..15)
     for a in range(16):
         for b in range(16):
-            assert multiplicador_secuencial_4bits(a, b) == a * b, f"Error en {a} * {b}"
+            resultado = await multiply_hw(dut, a, b)
+            esperado = a * b
+            assert resultado == esperado, (
+                f"Error en {a} * {b}: esperado {esperado} ({esperado:08b}), "
+                f"obtenido {resultado} ({resultado:08b})"
+            )
 
-    print("Todas las 256 combinaciones pasaron correctamente.")
+    dut._log.info("¡Todas las 256 combinaciones pasaron correctamente!")nes pasaron correctamente.")
