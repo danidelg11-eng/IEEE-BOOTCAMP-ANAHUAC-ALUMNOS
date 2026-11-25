@@ -1,2 +1,2 @@
-module tt_um_4
+module tt_um_4_bit_multiplier
 endmodule
